@@ -4,8 +4,8 @@ import formidable from "formidable";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import pdfParse from "pdf-parse";
-import Tesseract from "tesseract.js";
 
+// Disable body parsing by Next.js to allow formidable to handle it
 export const config = {
   api: {
     bodyParser: false,
@@ -24,12 +24,12 @@ const router = createRouter<NextApiRequest, NextApiResponse>();
 router.post((req, res) => {
   const form = formidable({
     keepExtensions: true,
-    maxFileSize: 10 * 1024 * 1024, // 10 MB max
+    maxFileSize: 10 * 1024 * 1024, // 10 MB
   });
 
-  form.parse(req, async (err:any, _fields:any, files:any) => {
+  form.parse(req, async (err: any, _fields: any, files: any) => {
     if (err || !files.file) {
-      console.error("❌ Formidable error:", err);
+      console.error("❌ Form parsing error:", err);
       return res.status(500).json({ error: "Form parsing failed" });
     }
 
@@ -40,7 +40,6 @@ router.post((req, res) => {
     const filePath = uploadedFile.filepath;
     const mimetype = uploadedFile.mimetype || "";
 
-    // Debug logs for Vercel
     console.log("📎 MIME:", mimetype);
     console.log("📎 Path:", filePath);
 
@@ -49,22 +48,18 @@ router.post((req, res) => {
     }
 
     try {
-      // ✅ Use "auto" to let Cloudinary decide type (prevents image failures)
+      // Let Cloudinary handle both images and PDFs
       const result = await cloudinary.uploader.upload(filePath, {
         resource_type: "auto",
       });
 
       let extractedText = "";
 
+      // ✅ Only extract text from PDF
       if (mimetype === "application/pdf") {
         const buffer = fs.readFileSync(filePath);
         const data = await pdfParse(buffer);
         extractedText = data.text;
-      } else if (mimetype.startsWith("image/")) {
-        const {
-          data: { text },
-        } = await Tesseract.recognize(filePath, "eng");
-        extractedText = text;
       }
 
       return res.status(200).json({
@@ -73,9 +68,9 @@ router.post((req, res) => {
       });
     } catch (uploadErr) {
       console.error("❌ Upload or parsing error:", uploadErr);
-      return res.status(500).json({ error: "Cloudinary upload failed" });
+      return res.status(500).json({ error: "Upload failed" });
     } finally {
-      // Clean up temp file
+      // Always delete temp file
       try {
         fs.unlinkSync(filePath);
       } catch (e) {

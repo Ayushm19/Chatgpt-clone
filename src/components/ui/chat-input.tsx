@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Paperclip, Send, Loader2, X } from 'lucide-react'
 import { MessagePayload } from '@/types'
+import Tesseract from "tesseract.js"
+
 
 interface ChatInputProps {
   onSendMessage: (message: MessagePayload, fileText?: string) => void
@@ -51,6 +53,14 @@ export function ChatInput({ onSendMessage, chatId, userId }: ChatInputProps) {
       const data = await res.json()
       fileUrl = data.secure_url
       extractedText = data.extracted_text || ""
+
+      // OCR IN FRONTEND
+      if (selectedFile.type.startsWith("image/")) {
+        const { data: { text } } = await Tesseract.recognize(selectedFile, "eng");
+        extractedText = text;
+      } else if (selectedFile.type === "application/pdf") {
+        extractedText = data.extracted_text || "";
+      }
     }
 
     const contentToSend = [input.trim(), fileUrl].filter(Boolean).join("\n\n")
