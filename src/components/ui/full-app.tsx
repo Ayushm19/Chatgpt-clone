@@ -148,7 +148,7 @@ export default function FullApp() {
 
   return (
     <div className="flex flex-col bg-popover text-foreground w-full h-full overflow-x-hidden">
-      <main className="flex-1 px-4 pb-32 pt-4 flex flex-col space-y-4 overflow-y-auto max-w-full">
+      <main className="flex-1 px-4 pb-32 pt-4 flex flex-col space-y-4 overflow-y-auto overflow-x-hidden max-w-full min-w-0">
         {messages.length === 0 && (
           <p className="text-muted-foreground text-sm text-center mt-4">
             Start chatting with AI...
@@ -165,7 +165,7 @@ export default function FullApp() {
             }`}
           >
             {msg.role === "assistant" ? (
-              <div className="prose prose-neutral dark:prose-invert max-w-none">
+              <div className="prose prose-neutral dark:prose-invert max-w-none min-w-0">
                 <ReactMarkdown
                   components={{
                     code({ inline, className, children, ...props }: CodeProps) {

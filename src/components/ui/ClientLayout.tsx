@@ -30,7 +30,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const sidebarWidth = isCollapsed ? 72 : 240;
 
   return (
-    <div className="flex h-screen w-full overflow-x-hidden">
+    <div className="flex h-screen w-full ">
       {/* Sidebar */}
       <Sidebar
         isCollapsed={isCollapsed}
@@ -43,7 +43,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       {/* Main area */}
       <div
-        className="flex flex-col flex-1 transition-all duration-300 px-4"
+        className="flex flex-col flex-1 transition-all duration-300 px-4 min-w-0"
         style={{
           marginLeft: !isMobile ? `${sidebarWidth}px` : 0, // ✅ no margin on mobile
         }}
